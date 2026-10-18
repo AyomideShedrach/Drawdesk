@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.liime.drawdesk",
+  "productName": "DrawDesk",
+  "copyright": "Copyright © 2026 LIIME",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/*.exe",
+    "!dist/*.blockmap",
+    "!dist/win-unpacked/**/*",
+    "!dist/builder-effective-config.yaml",
+    "electron/**/*",
+    "build/icon.ico",
+    "build/icon.png",
+    "build/icon.svg",
+    "package.json"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "build/icon.ico",
+    "signExecutable": false,
+    "legalTrademarks": "LIIME™",
+    "executableName": "DrawDesk"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "DrawDesk",
+    "uninstallDisplayName": "DrawDesk",
+    "installerIcon": "build/icon.ico",
+    "uninstallerIcon": "build/icon.ico",
+    "deleteAppDataOnUninstall": false
+  }
+}

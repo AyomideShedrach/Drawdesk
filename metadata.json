@@ -1,0 +1,6 @@
+{
+  "name": "Storyboard Traditional Desk",
+  "description": "Traditional animation storyboard sketchbook featuring pen and pencil tools, Acme peg hole alignment, onion skinning, and authentic front-to-back paper page flipping.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

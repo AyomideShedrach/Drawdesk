@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+}
+
+@keyframes flipPageForward {
+  0% {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 1;
+  }
+  45% {
+    transform: rotateX(-65deg) translateY(-70px) scale(0.96);
+    opacity: 0.85;
+  }
+  100% {
+    transform: rotateX(-115deg) translateY(-140px) scale(0.92);
+    opacity: 0;
+  }
+}
+
+@keyframes flipPageBackward {
+  0% {
+    transform: rotateX(-115deg) translateY(-140px) scale(0.92);
+    opacity: 0;
+  }
+  55% {
+    transform: rotateX(-45deg) translateY(-40px) scale(0.97);
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotateX(0deg) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-flip-forward {
+  animation: flipPageForward 0.38s cubic-bezier(0.2, 0.85, 0.3, 1) forwards;
+}
+
+.animate-flip-down {
+  animation: flipPageBackward 0.38s cubic-bezier(0.2, 0.85, 0.3, 1) forwards;
+}
