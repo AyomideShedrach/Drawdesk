@@ -1,6 +1,7 @@
 import React from 'react';
 import { Frame, ToolSettings, OnionSkinSettings, PerspectiveConfig } from '../types/storyboard';
 import { DrawingCanvas } from './DrawingCanvas';
+import { Film } from 'lucide-react';
 
 interface StoryboardSheetProps {
   currentFrame: Frame;
@@ -20,6 +21,7 @@ interface StoryboardSheetProps {
   canRedoChange: (can: boolean) => void;
   perspectiveConfig: PerspectiveConfig;
   onUpdatePerspectiveConfig: (newConfig: Partial<PerspectiveConfig>) => void;
+  onOpenAnimatic?: () => void;
   theme: 'light' | 'dark';
 }
 
@@ -41,6 +43,7 @@ export const StoryboardSheet: React.FC<StoryboardSheetProps> = ({
   canRedoChange,
   perspectiveConfig,
   onUpdatePerspectiveConfig,
+  onOpenAnimatic,
   theme,
 }) => {
   const isDark = theme === 'dark';
@@ -156,6 +159,24 @@ export const StoryboardSheet: React.FC<StoryboardSheetProps> = ({
           >
             {Math.round(currentFrame.durationSec * 24)} FRAMES @ 24FPS
           </span>
+
+          {onOpenAnimatic && (
+            <>
+              <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>|</span>
+              <button
+                onClick={onOpenAnimatic}
+                title="Launch Animatic Mode with storyboard timing playback"
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all border shadow-2xs ${
+                  isDark
+                    ? 'bg-amber-950/40 text-amber-300 border-amber-800/60 hover:bg-amber-900/50'
+                    : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                }`}
+              >
+                <Film className="w-3 h-3 text-amber-500" />
+                <span>ANIMATIC</span>
+              </button>
+            </>
+          )}
 
           {/* Quick Light Table / Onion Skin Status & Toggle */}
           {onChangeOnionSettings && (

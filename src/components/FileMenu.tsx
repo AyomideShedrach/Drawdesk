@@ -11,6 +11,7 @@ import {
   Video,
   FileText,
   Sparkles,
+  Film,
 } from 'lucide-react';
 
 interface FileMenuProps {
@@ -23,6 +24,7 @@ interface FileMenuProps {
   onExportTrad: () => void;
   onExportImages: () => void;
   onOpenTimelapse?: () => void;
+  onOpenAnimatic?: () => void;
   onOpenLiimeSuite?: () => void;
   isSaved?: boolean;
   theme?: 'light' | 'dark';
@@ -38,6 +40,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({
   onExportTrad,
   onExportImages,
   onOpenTimelapse,
+  onOpenAnimatic,
   onOpenLiimeSuite,
   theme = 'light',
 }) => {
@@ -206,6 +209,20 @@ export const FileMenu: React.FC<FileMenuProps> = ({
                 <span className="font-medium">Export & Batch Render...</span>
               </div>
             </button>
+
+            {onOpenAnimatic && (
+              <button
+                onClick={() => handleAction(onOpenAnimatic)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-colors ${
+                  isDark ? 'hover:bg-zinc-800 text-zinc-100' : 'hover:bg-zinc-100 text-zinc-900'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Film className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="font-medium">Animatic Mode (Timing & Video)...</span>
+                </div>
+              </button>
+            )}
 
             {onOpenTimelapse && (
               <button

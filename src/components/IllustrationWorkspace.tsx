@@ -28,6 +28,13 @@ import {
   Sparkles,
   Maximize2,
   ChevronDown,
+  GripVertical,
+  Move,
+  ChevronLeft,
+  ChevronRight,
+  PanelLeft,
+  PanelRight,
+  RefreshCw,
 } from 'lucide-react';
 import {
   LassoClipboardData,
@@ -114,6 +121,58 @@ export const IllustrationWorkspace: React.FC<IllustrationWorkspaceProps> = ({
   const [brushSize, setBrushSize] = useState<number>(3);
   const [eraserSize, setEraserSize] = useState<number>(18);
   const [brushOpacity, setBrushOpacity] = useState<number>(1.0);
+
+  // Movable & Adjustable Tool Dock Settings
+  const [dockPosition, setDockPosition] = useState<'left' | 'right' | 'floating'>('left');
+  const [dockCollapsed, setDockCollapsed] = useState<boolean>(false);
+  const [dockWidthMode, setDockWidthMode] = useState<'compact' | 'normal' | 'wide'>('normal');
+  const [dockPos, setDockPos] = useState<{ x: number; y: number }>({ x: 24, y: 80 });
+
+  // Floating dock drag interaction
+  const isDraggingDockRef = useRef(false);
+  const dockDragStartRef = useRef<{ pointerX: number; pointerY: number; startX: number; startY: number }>({
+    pointerX: 0,
+    pointerY: 0,
+    startX: 0,
+    startY: 0,
+  });
+
+  const handleDockPointerDown = (e: React.PointerEvent) => {
+    // If not already floating, switch to floating on drag handle grab
+    if (dockPosition !== 'floating') {
+      setDockPosition('floating');
+    }
+    isDraggingDockRef.current = true;
+    dockDragStartRef.current = {
+      pointerX: e.clientX,
+      pointerY: e.clientY,
+      startX: dockPos.x,
+      startY: dockPos.y,
+    };
+    try {
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handleDockPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingDockRef.current) return;
+    const dx = e.clientX - dockDragStartRef.current.pointerX;
+    const dy = e.clientY - dockDragStartRef.current.pointerY;
+    const maxX = Math.max(100, window.innerWidth - (dockCollapsed ? 65 : dockWidthMode === 'compact' ? 240 : dockWidthMode === 'wide' ? 360 : 300));
+    const maxY = Math.max(100, window.innerHeight - 150);
+    const newX = Math.max(10, Math.min(maxX, dockDragStartRef.current.startX + dx));
+    const newY = Math.max(48, Math.min(maxY, dockDragStartRef.current.startY + dy));
+    setDockPos({ x: newX, y: newY });
+  };
+
+  const handleDockPointerUp = (e: React.PointerEvent) => {
+    if (isDraggingDockRef.current) {
+      isDraggingDockRef.current = false;
+      try {
+        (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
 
   // Save / Export modal state
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -380,8 +439,11 @@ export const IllustrationWorkspace: React.FC<IllustrationWorkspaceProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    try {
+      localStorage.removeItem('drawdesk_rough_illustration_cache');
+    } catch {}
     pushHistory();
-    showToast('Cleared canvas');
+    showToast('Canvas cleared & reset to paper');
   }, [cancelSelection, pushHistory]);
 
   // Initialize canvas on mount or aspect ratio change
@@ -400,6 +462,25 @@ export const IllustrationWorkspace: React.FC<IllustrationWorkspaceProps> = ({
     if (cached && cached.length > 50) {
       const img = new Image();
       img.onload = () => {
+        // Quick verification: check if cached image was corrupted with solid opaque black
+        const testCanvas = document.createElement('canvas');
+        testCanvas.width = 16;
+        testCanvas.height = 16;
+        const testCtx = testCanvas.getContext('2d');
+        if (testCtx) {
+          testCtx.drawImage(img, 0, 0, 16, 16);
+          const pixel = testCtx.getImageData(8, 8, 1, 1).data;
+          // If solid opaque black, discard corrupted cache
+          if (pixel[0] < 20 && pixel[1] < 20 && pixel[2] < 20 && pixel[3] > 240) {
+            localStorage.removeItem('drawdesk_rough_illustration_cache');
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            const blank = ctx.getImageData(0, 0, logicalWidth, logicalHeight);
+            historyRef.current = [blank];
+            historyIndexRef.current = 0;
+            return;
+          }
+        }
+
         ctx.clearRect(0, 0, logicalWidth, logicalHeight);
         ctx.drawImage(img, 0, 0, logicalWidth, logicalHeight);
         const initial = ctx.getImageData(0, 0, logicalWidth, logicalHeight);
@@ -407,6 +488,9 @@ export const IllustrationWorkspace: React.FC<IllustrationWorkspaceProps> = ({
         historyIndexRef.current = 0;
         setCanUndo(false);
         setCanRedo(false);
+      };
+      img.onerror = () => {
+        localStorage.removeItem('drawdesk_rough_illustration_cache');
       };
       img.src = cached;
     } else {

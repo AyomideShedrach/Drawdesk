@@ -44,6 +44,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { PdfImportModal } from './components/PdfImportModal';
 import { IllustrationWorkspace } from './components/IllustrationWorkspace';
 import { LiimeSuiteModal } from './components/LiimeSuiteModal';
+import { AnimaticMode } from './components/AnimaticMode';
 import {
   timelapseRecorder,
   TimelapseState,
@@ -67,6 +68,7 @@ import {
   Square,
   Palette,
   Sparkles,
+  Film,
 } from 'lucide-react';
 
 export default function App() {
@@ -78,8 +80,8 @@ export default function App() {
   const [currentProject, setCurrentProject] = useState<StoryboardProject>(initialActiveProject);
   const [projectsList, setProjectsList] = useState<ProjectSummary[]>(initialProjects);
 
-  // Active view: 'home' (Projects Dashboard) | 'desk' (Drawing Canvas) | 'grid' (Wall) | 'illustration' (Illustration Mode)
-  const [activeView, setActiveView] = useState<'home' | 'desk' | 'grid' | 'illustration'>('home');
+  // Active view: 'home' (Projects Dashboard) | 'desk' (Drawing Canvas) | 'grid' (Wall) | 'illustration' (Illustration Mode) | 'animatic' (Animatic Mode)
+  const [activeView, setActiveView] = useState<'home' | 'desk' | 'grid' | 'illustration' | 'animatic'>('home');
 
   // Frames & active index within current project
   const [frames, setFrames] = useState<Frame[]>(currentProject.frames);
@@ -168,6 +170,32 @@ export default function App() {
       showToast('Illustration added to Storyboard desk as a new frame');
     },
     [currentProject, currentFrameIndex, frames, showToast]
+  );
+
+  // Update a frame's duration/timing directly from Animatic Mode
+  const handleUpdateFrameTiming = useCallback(
+    (frameIndex: number, newDurationSec: number) => {
+      setFrames((prevFrames) => {
+        if (!prevFrames[frameIndex]) return prevFrames;
+        const updatedFrames = [...prevFrames];
+        updatedFrames[frameIndex] = {
+          ...updatedFrames[frameIndex],
+          durationSec: newDurationSec,
+        };
+
+        const updatedProject: StoryboardProject = {
+          ...currentProject,
+          frames: updatedFrames,
+          updatedAt: Date.now(),
+        };
+        setCurrentProject(updatedProject);
+        saveProject(updatedProject);
+        setProjectsList(getProjectsList());
+
+        return updatedFrames;
+      });
+    },
+    [currentProject]
   );
 
   // Save status badge: 'saved' | 'saving' | 'unsaved'
@@ -1071,6 +1099,7 @@ export default function App() {
               setTimelapseResult(null);
               setIsTimelapseModalOpen(true);
             }}
+            onOpenAnimatic={() => setActiveView('animatic')}
             onOpenLiimeSuite={() => setIsLiimeSuiteOpen(true)}
             theme={theme}
           />
@@ -1156,6 +1185,24 @@ export default function App() {
           >
             <Palette className="w-3.5 h-3.5" />
             <span>Illustration Mode</span>
+          </button>
+
+          {/* Animatic Mode */}
+          <button
+            onClick={() => setActiveView('animatic')}
+            className={`flex items-center gap-1.5 transition-colors ${
+              activeView === 'animatic'
+                ? theme === 'dark'
+                  ? 'text-white font-bold underline underline-offset-4 decoration-amber-400'
+                  : 'text-zinc-950 font-bold underline underline-offset-4 decoration-amber-600'
+                : theme === 'dark'
+                ? 'hover:text-zinc-200'
+                : 'hover:text-zinc-900'
+            }`}
+            title="Animatic Leica Reel Mode with exact storyboard timing, audio track & video export"
+          >
+            <Film className="w-3.5 h-3.5 text-amber-500" />
+            <span>Animatic Mode</span>
           </button>
 
           {/* Storyboard Wall */}
@@ -1346,6 +1393,12 @@ export default function App() {
             onOpenTradFile={handleOpenTradFile}
             onOpenPdfFile={handleOpenPdfFile}
             onOpenIllustrationMode={() => setActiveView('illustration')}
+            onOpenAnimaticMode={(id) => {
+              if (id && id !== currentProject.id) {
+                handleOpenExistingProject(id);
+              }
+              setActiveView('animatic');
+            }}
             onOpenLiimeSuite={() => setIsLiimeSuiteOpen(true)}
             onSaveAsTrad={(id) => {
               const p = getProject(id);
@@ -1355,6 +1408,17 @@ export default function App() {
             onDeleteProject={handleDeleteProject}
             onRenameProject={handleRenameProject}
             theme={theme}
+          />
+        ) : activeView === 'animatic' ? (
+          <AnimaticMode
+            projectTitle={currentProject.title}
+            frames={frames}
+            initialFrameIndex={currentFrameIndex}
+            onBackToDesk={() => setActiveView('desk')}
+            onOpenWall={() => setActiveView('grid')}
+            onUpdateFrameTiming={handleUpdateFrameTiming}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         ) : activeView === 'grid' ? (
           <div className="p-3 sm:p-5 flex-1 flex flex-col">
@@ -1371,6 +1435,7 @@ export default function App() {
                 setActiveView('desk');
                 setIsPlaying(true);
               }}
+              onOpenAnimatic={() => setActiveView('animatic')}
               theme={theme}
             />
           </div>
@@ -1457,6 +1522,7 @@ export default function App() {
                     canRedoChange={setCanRedo}
                     perspectiveConfig={perspectiveConfig}
                     onUpdatePerspectiveConfig={handleUpdatePerspectiveConfig}
+                    onOpenAnimatic={() => setActiveView('animatic')}
                     theme={theme}
                   />
                 </PhysicalPageFlip>

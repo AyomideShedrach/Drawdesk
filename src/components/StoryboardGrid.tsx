@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Frame } from '../types/storyboard';
-import { Plus, Copy, Trash2, ArrowRight, ArrowLeft, Play, GripVertical } from 'lucide-react';
+import { Plus, Copy, Trash2, ArrowRight, ArrowLeft, Play, GripVertical, Film } from 'lucide-react';
 
 interface StoryboardGridProps {
   frames: Frame[];
@@ -12,6 +12,7 @@ interface StoryboardGridProps {
   onMoveFrame: (fromIndex: number, toIndex: number) => void;
   onCloseGrid: () => void;
   onPlayRoll: () => void;
+  onOpenAnimatic?: () => void;
   theme?: 'light' | 'dark';
 }
 
@@ -25,6 +26,7 @@ export const StoryboardGrid: React.FC<StoryboardGridProps> = ({
   onMoveFrame,
   onCloseGrid,
   onPlayRoll,
+  onOpenAnimatic,
   theme = 'light',
 }) => {
   const isDark = theme === 'dark';
@@ -97,6 +99,21 @@ export const StoryboardGrid: React.FC<StoryboardGridProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5">
+          {onOpenAnimatic && (
+            <button
+              onClick={onOpenAnimatic}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border transition-colors shadow-2xs ${
+                isDark
+                  ? 'bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border-amber-800/60'
+                  : 'bg-[#FFFDF7] hover:bg-amber-50 text-amber-900 border-amber-300'
+              }`}
+              title="Open Animatic Mode with storyboard timing playback and video export"
+            >
+              <Film className="w-3.5 h-3.5 text-amber-500" />
+              <span>Animatic Mode</span>
+            </button>
+          )}
+
           <button
             onClick={onPlayRoll}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border transition-colors shadow-2xs ${

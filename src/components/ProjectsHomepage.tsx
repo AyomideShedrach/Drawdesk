@@ -17,6 +17,7 @@ import {
   FileCode2,
   FileText,
   Palette,
+  Film,
 } from 'lucide-react';
 
 interface ProjectsHomepageProps {
@@ -32,6 +33,7 @@ interface ProjectsHomepageProps {
   onRenameProject: (id: string, newTitle: string) => void;
   theme?: 'light' | 'dark';
   onOpenIllustrationMode?: () => void;
+  onOpenAnimaticMode?: (projectId?: string) => void;
   onOpenLiimeSuite?: () => void;
 }
 
@@ -48,6 +50,7 @@ export const ProjectsHomepage: React.FC<ProjectsHomepageProps> = ({
   onRenameProject,
   theme = 'light',
   onOpenIllustrationMode,
+  onOpenAnimaticMode,
   onOpenLiimeSuite,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -203,6 +206,21 @@ export const ProjectsHomepage: React.FC<ProjectsHomepageProps> = ({
 
         {/* Primary Action Buttons */}
         <div className="flex flex-wrap items-center gap-2.5">
+          {onOpenAnimaticMode && (
+            <button
+              onClick={() => onOpenAnimaticMode()}
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg border shadow-2xs transition-colors ${
+                isDark
+                  ? 'bg-amber-950/40 hover:bg-amber-900/50 border-amber-800/60 text-amber-300'
+                  : 'bg-[#FFFDF7] hover:bg-amber-50 border-amber-300 text-amber-900'
+              }`}
+              title="Launch Animatic Mode (Leica Reel timing, playback & video export)"
+            >
+              <Film className="w-4 h-4 text-amber-500" />
+              <span>Animatic Mode</span>
+            </button>
+          )}
+
           {onOpenIllustrationMode && (
             <button
               onClick={onOpenIllustrationMode}
@@ -523,6 +541,22 @@ export const ProjectsHomepage: React.FC<ProjectsHomepageProps> = ({
 
                     {/* Secondary Actions Toolbar */}
                     <div className="flex items-center gap-1">
+                      {/* Play Animatic */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenAnimaticMode?.(project.id);
+                        }}
+                        title="Play Animatic for this storyboard"
+                        className={`p-1.5 rounded-md transition-colors ${
+                          isDark
+                            ? 'text-amber-400 hover:text-amber-300 hover:bg-zinc-800'
+                            : 'text-amber-700 hover:text-amber-900 hover:bg-zinc-200'
+                        }`}
+                      >
+                        <Film className="w-3.5 h-3.5" />
+                      </button>
+
                       {/* Save As .trad */}
                       <button
                         onClick={() => onSaveAsTrad(project.id)}
