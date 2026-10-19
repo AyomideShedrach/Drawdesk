@@ -351,8 +351,8 @@ export async function renderAnimaticVideo(
     const drawX = (width - drawW) / 2;
     const drawY = pegOffset + (availableH - drawH) / 2;
 
-    // Subtle paper backing card
-    ctx.fillStyle = isDark ? '#1c1c22' : '#FFFFFF';
+    // Subtle paper backing card (warm drafting paper so drawings are always visible)
+    ctx.fillStyle = '#F4F0E8';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
     ctx.shadowBlur = 12;
     ctx.shadowOffsetY = 4;
